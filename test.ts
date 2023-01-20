@@ -1,43 +1,66 @@
-import { group } from '@angular/animations';
-import { Component } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { form } from './constants';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+import { HomeService } from '../services/home.service';
+import { Section, Question } from '../constants';
+import {MatAccordion} from '@angular/material/expansion';
+import { backend_json } from '../constants';
+import { FormArray, FormBuilder, FormControl, FormGroup, isFormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
 })
-export class AppComponent {
+export class HomePage implements OnInit {
 
+  obj = Object;
+  accordionForm = this.fb.group({});
   sections: any;
-  form = this.fb.group({});
+  secs: Section[] = [];
 
-  constructor(private fb: FormBuilder) {
-    this.sections = form;
-    this.setSections();
-  }
-  setSections() {
-    const formControls: any = {};
-    // for (let key of Object.keys(this.sections)) {
-    //   let group = new FormGroup({})
-    //   for (let question of this.sections[key].questions) {
-    //     formControls[key + "-" + question.id] = new FormControl('');
-    //   }
-    // }
-    // this.form = new FormGroup(formControls);
-    // console.log(this.form.value);
+  constructor(private fb: FormBuilder, private home: HomeService) { 
+    this.sections = backend_json;
+    for (let key of Object.keys(this.sections)) {
+      console.log(this.sections[key].section_name);
+    }
+    // this.setInterfaces();
+    this.setformgroups();
+   }
 
-    Object.keys(this.sections).forEach(sectionKey => {
-      const section = this.sections[sectionKey];
-      section.questions.forEach((question: any) => {
+  //  setInterfaces() {
+  //   for (let [key, section] of Object.entries(backend_json)) {
+  //     let s: Section = {
+  //       section_id: key,
+  //       section_name: section.section_name,
+  //       questions: section.questions
+  //     };
+  //     this.secs.push(s);
+  //   }
+  //   console.log(this.secs);
+  //  }
+
+  setformgroups() {
+    const controls: any = {};
+    Object.keys(this.sections).forEach((key: any) => {
+      this.sections[key].questions.forEach((question: any) => {
         if (String(question.comment) == 'true') {
-          this.form.addControl(sectionKey + "_" + question.id + "_c", new FormControl(''));
+          this.accordionForm.addControl(key + "_" + question.id, new FormControl(question.answer_type=='multi'?[]:'', question.auto_populate=='true'? null:Validators.required));
+          this.accordionForm.addControl(key + "_" + question.id + "_c", new FormControl('', Validators.required));
         }
-          this.form.addControl(sectionKey + "_" + question.id, new FormControl(''));
-      });
-      
-  });
-  console.log(this.form.value);
+        else {
+          this.accordionForm.addControl(key + "_" + question.id, new FormControl(question.answer_type=='multi'?[]:'', question.auto_populate=='true'? null:Validators.required));
+        }
+      })
+    })
+
+    console.log(this.accordionForm.value);
   }
-}
+
+   ngOnInit(): void {
+   }
+
+   submitForm() {
+    console.log(this.accordionForm.value);
+   }
+
+};
