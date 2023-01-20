@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title align="center">Accordion</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form style="text-align: left; margin: 0px auto" [formGroup]="accordionForm">
+    <mat-accordion>
+      <div *ngFor="let key of obj.keys(sections)">
+        <mat-expansion-panel class="panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="width-80">
+              <h4>{{ sections[key].section_name }}:</h4>
+              <ion-text color="danger">*</ion-text>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="scope-width">
+            <ion-row justify-content-between *ngFor="let question of sections[key].questions">
+              <ion-col  size="3" size-sm="3" style="margin: auto 0;">
+                {{ question.question }} {{ question.auto_populate }} <ion-text *ngIf="!question.auto_populate" color="danger">*</ion-text>
+              </ion-col>
+              <ion-col></ion-col>
+              <ion-col size="4" size-sm="3">
+                <ion-item  *ngIf="question.answer_type == 'select' || question.answer_type == 'multi'">
+                  <div *ngIf="!question.comment">
+                    <ion-select [formControlName]="key + '_' + question.id" style="width: 100%; max-width: 100% !important;" placeholder="Assign to">
+                      <ion-select-option *ngFor="let choice of question.choice_name">{{ choice }}</ion-select-option>
+                    </ion-select>
+                  </div>
+                  <div *ngIf="question.comment">
+                  <ion-select [multiple]="true" [formControlName]="key + '_' + question.id" style="width: 100%; max-width: 100% !important;" placeholder="Assign to">
+                    <ion-select-option [value]="choice" *ngFor="let choice of question.choice_name">{{ choice }}</ion-select-option>
+                  </ion-select>
+                  <div>
+                  <ion-input placeholder="Comment" [formControlName]="key + '_' + question.id + '_c'" ></ion-input>
+                </div>  
+                </div>
+                </ion-item>
+                <ion-item  *ngIf="question.answer_type == 'text'">
+                  <div *ngIf="!question.comment">
+                    <ion-input placeholder="Answer" [formControlName]="key + '_' + question.id"></ion-input>
+                  </div>
+                  <div *ngIf="question.comment">
+                    <ion-input [disabled]="accordionForm.get(key + '_' + question.id)?.value === 'Yes'" *ngIf="question.comment" [formControlName]="key + '_' + question.id"></ion-input>
+                    <div>
+                      <ion-input placeholder="Comment" [formControlName]="key + '_' + question.id + '_c'" ></ion-input>
+                    </div>
+                  </div>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </mat-accordion>
+    <ion-row>
+      <ion-col><ion-text color="danger">Note : All Fields are Mandatory.</ion-text></ion-col>
+    </ion-row>
+    <ion-row style="justify-content: center;">
+      <ion-button [disabled]="accordionForm.invalid" size="small" (click)="submitForm()">Submit</ion-button>
+    </ion-row>
+  </form>
+</ion-content>
